@@ -468,7 +468,7 @@ def number_state_0():
         int_value = (int_value*10) + int(ch)
         return number_state_2()
     else:
-        return (False,None)
+        return None
 
 def number_state_1():
     global int_value
@@ -483,10 +483,10 @@ def number_state_1():
         return number_state_5()
     elif ch == '.':
         return number_state_4()
-    elif ch == END:
-        return (True,int_value)
+    elif ch == END or ch == ' ':
+        return int_value
     else:
-        return (False,None)
+        return None
 
 def number_state_2():
     global int_value
@@ -499,10 +499,10 @@ def number_state_2():
         return number_state_6()
     elif ch == '.':
         return number_state_4()
-    elif ch == END:
-        return (True,int_value)
+    elif ch == END or ch == ' ':
+        return int_value
     else:
-        return (False,None)
+        return None
 
 def number_state_3():
     global int_value
@@ -513,7 +513,7 @@ def number_state_3():
         exp_value += 1
         return number_state_4()
     else:
-        return (False,None)
+        return None
 
 def number_state_4():
     global int_value
@@ -525,11 +525,11 @@ def number_state_4():
         int_value = (int_value*10) + int(ch)
         exp_value += 1
         return number_state_4()
-    elif ch == END:
+    elif ch == END or ch == ' ':
         result = int_value * 10**(0-exp_value)
-        return (True,result)
+        return result
     else:
-        return (False,None)
+        return None
 
 def number_state_5():
     global int_value
@@ -543,7 +543,7 @@ def number_state_5():
     elif ch == '.':
         return number_state_4()
     else:
-        return (False,None)
+        return None
 
 def number_state_6():
     global int_value
@@ -562,7 +562,7 @@ def number_state_6():
         sign_value = -1
         return number_state_7()
     else:
-        return (False,None)
+        return None
 
 def number_state_7():
     global int_value
@@ -573,7 +573,7 @@ def number_state_7():
         exp_value = (exp_value*10) + int(ch)
         return number_state_8()
     else:
-        return (False,None)
+        return None
 
 def number_state_8():
     global int_value
@@ -583,12 +583,12 @@ def number_state_8():
     if digit(ch):
         exp_value = (exp_value*10) + int(ch)
         return number_state_8()
-    elif ch == END:
+    elif ch == END or ch == ' ':
         #print(f"int_value : {int_value}, exp_value : {exp_value}, sign_value = {sign_value}")
         result = int_value * (10**(sign_value*exp_value))
-        return (True,result)
+        return result
     else:
-        return (False,None)
+        return None
 
 
 ########################
@@ -604,12 +604,16 @@ V = set(('.', 'e', 'E', '+', '-', '*', '/', '(', ')', ' ')
 # Question 10 : eval_exp
 
 def eval_exp():
-    print("@ATTENTION: eval_exp à finir !") # LIGNE A SUPPRIMER
     ch = next_char()
     if ch == '+':
         n1 = eval_exp()
         n2 = eval_exp()
         return n1 + n2
+    else:
+        return number()
+        
+#Error1 : Fin de mot non-trouvé
+#Error2 : << + 13 14 >> renvoie 17 et non pas 27
 
 
 ############
@@ -671,8 +675,8 @@ if __name__ == "__main__":
     print("@ Tapez une entrée:")
     try:
         #ok = pointfloat_Q2() # changer ici pour tester un autre automate sans valeur
-        ok, val = number() # changer ici pour tester un autre automate avec valeur
-        # ok, val = True, eval_exp() # changer ici pour tester eval_exp et eval_exp_v2
+        #ok, val = number() # changer ici pour tester un autre automate avec valeur
+        ok, val = True, eval_exp() # changer ici pour tester eval_exp et eval_exp_v2
         if ok:
             print("Accepted!")
             print("value:", val) # décommenter ici pour afficher la valeur (question 4 et +)
