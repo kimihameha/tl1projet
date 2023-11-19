@@ -627,7 +627,7 @@ def peek_char():
     if current_char == '':
         current_char = INPUT_STREAM.read(1)
     ch = current_char
-    # print("@", repr(ch))  # decommenting this line may help debugging
+    print("@", repr(ch))  # decommenting this line may help debugging
     if ch in V or ch in END:
         return ch
     raise Error('character ' + repr(ch) + ' unsupported')
@@ -638,11 +638,167 @@ def consume_char():
 
 
 def number_v2():
-    print("@ATTENTION: number_v2 à finir !") # LIGNE A SUPPRIMER
+    global int_value
+    global exp_value
+    init_char()
+    int_value = 0
+    exp_value = 0
+    sign_value = 0
+    return number_v2_state_0()
+
+def number_v2_state_0():
+    global int_value
+    global exp_value
+    consume_char()
+    ch = peek_char()
+    if ch == '0':
+        return number_v2_state_1()
+    elif ch == '.':
+        return number_v2_state_3()
+    elif nonzerodigit(ch):
+        int_value = (int_value*10) + int(ch)
+        return number_v2_state_2()
+    else:
+        return None
+
+def number_v2_state_1():
+    global int_value
+    global exp_value
+    consume_char()
+    ch = peek_char()
+    if ch == '0':
+        return number_v2_state_1()
+    elif ch == 'e' or ch == 'E':
+        return number_v2_state_6()
+    elif nonzerodigit(ch):
+        int_value = (int_value*10) + int(ch)
+        return number_v2_state_5()
+    elif ch == '.':
+        return number_v2_state_4()
+    elif ch == END or ch == ' ':
+        return int_value
+    else:
+        return None
+
+def number_v2_state_2():
+    global int_value
+    global exp_value
+    consume_char()
+    ch = peek_char()
+    if digit(ch):
+        int_value = (int_value*10) + int(ch)
+        return number_v2_state_2()
+    elif ch == 'e' or ch == 'E':
+        return number_v2_state_6()
+    elif ch == '.':
+        return number_v2_state_4()
+    elif ch == END or ch == ' ':
+        return int_value
+    else:
+        return None
+
+def number_v2_state_3():
+    global int_value
+    global exp_value
+    consume_char()
+    ch = peek_char()
+    if digit(ch):
+        int_value = (int_value*10) + int(ch)
+        exp_value += 1
+        return number_v2_state_4()
+    else:
+        return None
+
+def number_v2_state_4():
+    global int_value
+    global exp_value
+    consume_char()
+    ch = peek_char()
+    if ch == 'e' or ch == 'E':
+        return number_v2_state_6()
+    elif digit(ch):
+        int_value = (int_value*10) + int(ch)
+        exp_value += 1
+        return number_v2_state_4()
+    elif ch == END or ch == ' ':
+        result = int_value * 10**(0-exp_value)
+        return result
+    else:
+        return None
+
+def number_v2_state_5():
+    global int_value
+    global exp_value
+    consume_char()
+    ch = peek_char()
+    if digit(ch):
+        int_value = (int_value*10) + int(ch)
+        return number_v2_state_5()
+    elif ch == 'E' or ch == 'e':
+        return number_v2_state_6()
+    elif ch == '.':
+        return number_v2_state_4()
+    else:
+        return None
+
+def number_v2_state_6():
+    global int_value
+    global exp_value
+    global sign_value
+    consume_char()
+    ch = peek_char()
+    int_value = int_value * (10**(0-exp_value))
+    exp_value = 0
+    sign_value = 1
+    if digit(ch):
+        exp_value = (exp_value*10) + int(ch)
+        return number_v2_state_8()
+    elif ch == '+':
+        return number_v2_state_7()
+    elif ch == '-':
+        sign_value = -1
+        return number_v2_state_7()
+    else:
+        return None
+
+def number_v2_state_7():
+    global int_value
+    global exp_value
+    global sign_value
+    consume_char()
+    ch = peek_char()
+    if digit(ch):
+        exp_value = (exp_value*10) + int(ch)
+        return number_v2_state_8()
+    else:
+        return None
+
+def number_v2_state_8():
+    global int_value
+    global exp_value
+    global sign_value
+    consume_char()
+    ch = peek_char()
+    if digit(ch):
+        exp_value = (exp_value*10) + int(ch)
+        return number_v2_state_8()
+    elif ch == END or ch == ' ':
+        #print(f"int_value : {int_value}, exp_value : {exp_value}, sign_value = {sign_value}")
+        result = int_value * (10**(sign_value*exp_value))
+        return result
+    else:
+        return None
 
 
 def eval_exp_v2():
-    print("@ATTENTION: eval_exp_v2 à finir !") # LIGNE A SUPPRIMER
+    ch = peek_char()
+    if ch == '+':
+        consume_char()
+        n1 = eval_exp_v2()
+        n2 = eval_exp_v2()
+        return n1 + n2
+    else:
+        return number_v2()
 
 
 ############
@@ -676,7 +832,7 @@ if __name__ == "__main__":
     try:
         #ok = pointfloat_Q2() # changer ici pour tester un autre automate sans valeur
         #ok, val = number() # changer ici pour tester un autre automate avec valeur
-        ok, val = True, eval_exp() # changer ici pour tester eval_exp et eval_exp_v2
+        ok, val = True, eval_exp_v2() # changer ici pour tester eval_exp et eval_exp_v2
         if ok:
             print("Accepted!")
             print("value:", val) # décommenter ici pour afficher la valeur (question 4 et +)
