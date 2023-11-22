@@ -980,7 +980,176 @@ token_value = 0
 
 
 def FA_Lex_w_token():
-    print("@ATTENTION: FA_lex_w_token à finir !") # LIGNE A SUPPRIMER
+    global int_value
+    global exp_value
+    global other_symbols
+    init_char()
+    int_value = 0
+    exp_value = 0
+    sign_value = 0
+    other_symbols = ''
+    return number_lex_w_token_state_0()
+
+def number_lex_w_token_state_0():
+    global int_value
+    global exp_value
+    global other_symbols
+    ch = next_char()
+    if ch == '0':
+        return number_lex_w_token_state_1()
+    elif ch in operator or ch in ('(',')'):
+        other_symbols = ch
+        return number_lex_w_token_state_9()
+    elif ch == '(' or ch == ')':
+        other_symbols = ch
+        return number_lex_w_token_state_9()
+    elif ch == '.':
+        return number_lex_w_token_state_3()
+    elif nonzerodigit(ch):
+        int_value = (int_value*10) + int(ch)
+        return number_lex_w_token_state_2()
+    else:
+        return None
+
+def number_lex_w_token_state_1():
+    global int_value
+    global exp_value
+    ch = next_char()
+    if ch == '0':
+        return number_lex_w_token_state_1()
+    elif ch == 'e' or ch == 'E':
+        return number_lex_w_token_state_6()
+    elif nonzerodigit(ch):
+        int_value = (int_value*10) + int(ch)
+        return number_lex_w_token_state_5()
+    elif ch == '.':
+        return number_lex_w_token_state_4()
+    elif ch == END or ch == ' ':
+        return 0
+    else:
+        return None
+
+def number_lex_w_token_state_2():
+    global int_value
+    global exp_value
+    ch = next_char()
+    if digit(ch):
+        int_value = (int_value*10) + int(ch)
+        return number_lex_w_token_state_2()
+    elif ch == 'e' or ch == 'E':
+        return number_lex_w_token_state_6()
+    elif ch == '.':
+        return number_lex_w_token_state_4()
+    elif ch == END or ch == ' ':
+        return 0
+    else:
+        return None
+
+def number_lex_w_token_state_3():
+    global int_value
+    global exp_value
+    ch = next_char()
+    if digit(ch):
+        int_value = (int_value*10) + int(ch)
+        exp_value += 1
+        return number_lex_w_token_state_4()
+    else:
+        return None
+
+def number_lex_w_token_state_4():
+    global int_value
+    global exp_value
+    ch = next_char()
+    if ch == 'e' or ch == 'E':
+        return number_lex_w_token_state_6()
+    elif digit(ch):
+        int_value = (int_value*10) + int(ch)
+        exp_value += 1
+        return number_lex_w_token_state_4()
+    elif ch == END or ch == ' ':
+        result = 0
+        return result
+    else:
+        return None
+
+def number_lex_w_token_state_5():
+    global int_value
+    global exp_value
+    ch = next_char()
+    if digit(ch):
+        int_value = (int_value*10) + int(ch)
+        return number_lex_w_token_state_5()
+    elif ch == 'E' or ch == 'e':
+        return number_lex_w_token_state_6()
+    elif ch == '.':
+        return number_lex_w_token_state_4()
+    else:
+        return None
+
+def number_lex_w_token_state_6():
+    global int_value
+    global exp_value
+    global sign_value
+    ch = next_char()
+    int_value = int_value * (10**(0-exp_value))
+    exp_value = 0
+    sign_value = 1
+    if digit(ch):
+        exp_value = (exp_value*10) + int(ch)
+        return number_lex_w_token_state_8()
+    elif ch == '+':
+        return number_lex_w_token_state_7()
+    elif ch == '-':
+        sign_value = -1
+        return number_lex_w_token_state_7()
+    else:
+        return None
+
+def number_lex_w_token_state_7():
+    global int_value
+    global exp_value
+    global sign_value
+    ch = next_char()
+    if digit(ch):
+        exp_value = (exp_value*10) + int(ch)
+        return number_lex_w_token_state_8()
+    else:
+        return None
+
+def number_lex_w_token_state_8():
+    global int_value
+    global exp_value
+    global sign_value
+    ch = next_char()
+    if digit(ch):
+        exp_value = (exp_value*10) + int(ch)
+        return number_lex_w_token_state_8()
+    elif ch == END or ch == ' ':
+        return 0
+    else:
+        return None
+
+def number_lex_w_token_state_9():
+    global other_symbols
+    ch = next_char()
+    if ch == END:
+        match other_symbols:
+            case '+':
+                return 1
+            case '-':
+                return 2
+            case '*':
+                return 3
+            case '/':
+                return 4
+            case '(':
+                return 5
+            case ')':
+                return 6
+            case _:
+                return None
+    else:
+        return None
 
 
 
@@ -992,7 +1161,7 @@ if __name__ == "__main__":
     try:
         #ok = pointfloat_Q2() # changer ici pour tester un autre automate sans valeur
         #ok, val = number() # changer ici pour tester un autre automate avec valeur
-        ok, val = True, FA_Lex() # changer ici pour tester eval_exp et eval_exp_v2
+        ok, val = True, FA_Lex_w_token() # changer ici pour tester eval_exp et eval_exp_v2
         if ok:
             print("Accepted!")
             print("value:", val) # décommenter ici pour afficher la valeur (question 4 et +)
