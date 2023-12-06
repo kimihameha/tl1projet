@@ -437,7 +437,6 @@ def exponentfloat_state_8():
         exp_value = (exp_value*10) + int(ch)
         return exponentfloat_state_8()
     elif ch == END:
-        #print(f"int_value : {int_value}, exp_value : {exp_value}, sign_value = {sign_value}")
         result = int_value * (10**(sign_value*exp_value))
         return (True,result)
     else:
@@ -584,7 +583,6 @@ def number_state_8():
         exp_value = (exp_value*10) + int(ch)
         return number_state_8()
     elif ch == END or ch == ' ':
-        #print(f"int_value : {int_value}, exp_value : {exp_value}, sign_value = {sign_value}")
         result = int_value * (10**(sign_value*exp_value))
         return result
     else:
@@ -627,7 +625,7 @@ def peek_char():
     if current_char == '':
         current_char = INPUT_STREAM.read(1)
     ch = current_char
-    print("@", repr(ch))  # decommenting this line may help debugging
+    #print("@", repr(ch))  # decommenting this line may help debugging
     if ch in V or ch in END:
         return ch
     raise Error('character ' + repr(ch) + ' unsupported')
@@ -783,22 +781,21 @@ def number_v2_state_8():
         exp_value = (exp_value*10) + int(ch)
         return number_v2_state_8()
     elif ch == END or ch == ' ':
-        #print(f"int_value : {int_value}, exp_value : {exp_value}, sign_value = {sign_value}")
         result = int_value * (10**(sign_value*exp_value))
         return result
     else:
         return None
 
 
-def eval_exp_v2():
-    ch = peek_char()
-    if ch == '+':
-        consume_char()
-        n1 = eval_exp_v2()
-        n2 = eval_exp_v2()
-        return n1 + n2
-    else:
-        return number_v2()
+# def eval_exp_v2():
+#     ch = peek_char()
+#     if ch == '+':
+#         consume_char()
+#         n1 = eval_exp_v2()
+#         n2 = eval_exp_v2()
+#         return n1 + n2
+#     else:
+#         return number_v2()
 
 
 ############
@@ -822,7 +819,8 @@ def number_lex_state_0():
     global int_value
     global exp_value
     global other_symbols
-    ch = next_char()
+    consume_char()
+    ch = peek_char()
     if ch == '0':
         return number_lex_state_1()
     elif ch in operator:
@@ -837,12 +835,13 @@ def number_lex_state_0():
         int_value = (int_value*10) + int(ch)
         return number_lex_state_2()
     else:
-        return None
+        return (False,None)
 
 def number_lex_state_1():
     global int_value
     global exp_value
-    ch = next_char()
+    consume_char()
+    ch = peek_char()
     if ch == '0':
         return number_lex_state_1()
     elif ch == 'e' or ch == 'E':
@@ -853,14 +852,15 @@ def number_lex_state_1():
     elif ch == '.':
         return number_lex_state_4()
     elif ch == END or ch == ' ':
-        return int_value
+        return (True,int_value)
     else:
-        return None
+        return (False,None)
 
 def number_lex_state_2():
     global int_value
     global exp_value
-    ch = next_char()
+    consume_char()
+    ch = peek_char()
     if digit(ch):
         int_value = (int_value*10) + int(ch)
         return number_lex_state_2()
@@ -869,25 +869,27 @@ def number_lex_state_2():
     elif ch == '.':
         return number_lex_state_4()
     elif ch == END or ch == ' ':
-        return int_value
+        return (True,int_value)
     else:
-        return None
+        return (False,None)
 
 def number_lex_state_3():
     global int_value
     global exp_value
-    ch = next_char()
+    consume_char()
+    ch = peek_char()
     if digit(ch):
         int_value = (int_value*10) + int(ch)
         exp_value += 1
         return number_lex_state_4()
     else:
-        return None
+        return (False,None)
 
 def number_lex_state_4():
     global int_value
     global exp_value
-    ch = next_char()
+    consume_char()
+    ch = peek_char()
     if ch == 'e' or ch == 'E':
         return number_lex_state_6()
     elif digit(ch):
@@ -896,14 +898,15 @@ def number_lex_state_4():
         return number_lex_state_4()
     elif ch == END or ch == ' ':
         result = int_value * 10**(0-exp_value)
-        return result
+        return (True,result)
     else:
-        return None
+        return (False,None)
 
 def number_lex_state_5():
     global int_value
     global exp_value
-    ch = next_char()
+    consume_char()
+    ch = peek_char()
     if digit(ch):
         int_value = (int_value*10) + int(ch)
         return number_lex_state_5()
@@ -912,13 +915,14 @@ def number_lex_state_5():
     elif ch == '.':
         return number_lex_state_4()
     else:
-        return None
+        return (False,None)
 
 def number_lex_state_6():
     global int_value
     global exp_value
     global sign_value
-    ch = next_char()
+    consume_char()
+    ch = peek_char()
     int_value = int_value * (10**(0-exp_value))
     exp_value = 0
     sign_value = 1
@@ -931,42 +935,43 @@ def number_lex_state_6():
         sign_value = -1
         return number_lex_state_7()
     else:
-        return None
+        return (False,None)
 
 def number_lex_state_7():
     global int_value
     global exp_value
     global sign_value
-    ch = next_char()
+    consume_char()
+    ch = peek_char()
     if digit(ch):
         exp_value = (exp_value*10) + int(ch)
         return number_lex_state_8()
     else:
-        return None
+        return (False,None)
 
 def number_lex_state_8():
     global int_value
     global exp_value
     global sign_value
-    ch = next_char()
+    consume_char()
+    ch = peek_char()
     if digit(ch):
         exp_value = (exp_value*10) + int(ch)
         return number_lex_state_8()
     elif ch == END or ch == ' ':
-        #print(f"int_value : {int_value}, exp_value : {exp_value}, sign_value = {sign_value}")
         result = int_value * (10**(sign_value*exp_value))
-        return result
+        return (True,result)
     else:
-        return None
+        return (False,None)
 
 def number_lex_state_9():
     global other_symbols
-    ch = next_char()
-    if ch == END:
-        print("yes")
-        return other_symbols
+    consume_char()
+    ch = peek_char()
+    if ch == END or ch == ' ':
+        return (True,other_symbols)
     else:
-        return None
+        return (False,None)
 
 #Lex à verifier : Ca fonctionne mais pas sûr de ce qu'il faut renvoyer
 
@@ -997,19 +1002,29 @@ def number_lex_w_token_state_0():
     ch = next_char()
     if ch == '0':
         return number_lex_w_token_state_1()
-    elif ch in operator or ch in ('(',')'):
-        other_symbols = ch
-        return number_lex_w_token_state_9()
-    elif ch == '(' or ch == ')':
-        other_symbols = ch
-        return number_lex_w_token_state_9()
+    elif ch in ('(',')') or ch in operator:
+        match ch:
+            case '+':
+                return (True,"ADD")
+            case '-':
+                return (True,"SOUS")
+            case '*':
+                return (True,"MUL")
+            case '/':
+                return (True,"DIV")
+            case '(':
+                return (True,"OPAR")
+            case ')':
+                return (True,"FPAR")
+            case _:
+                return (False,None)
     elif ch == '.':
         return number_lex_w_token_state_3()
     elif nonzerodigit(ch):
         int_value = (int_value*10) + int(ch)
         return number_lex_w_token_state_2()
     else:
-        return None
+        return (False,None)
 
 def number_lex_w_token_state_1():
     global int_value
@@ -1024,10 +1039,10 @@ def number_lex_w_token_state_1():
         return number_lex_w_token_state_5()
     elif ch == '.':
         return number_lex_w_token_state_4()
-    elif ch == END or ch == ' ':
-        return 0
+    elif ch in (END,' ','(',')') or ch in operator:
+        return (True,"NUM")
     else:
-        return None
+        return (False,None)
 
 def number_lex_w_token_state_2():
     global int_value
@@ -1040,10 +1055,10 @@ def number_lex_w_token_state_2():
         return number_lex_w_token_state_6()
     elif ch == '.':
         return number_lex_w_token_state_4()
-    elif ch == END or ch == ' ':
-        return 0
+    elif ch in (END,' ','(',')') or ch in operator:
+        return (True,"NUM")
     else:
-        return None
+        return (False,None)
 
 def number_lex_w_token_state_3():
     global int_value
@@ -1054,7 +1069,7 @@ def number_lex_w_token_state_3():
         exp_value += 1
         return number_lex_w_token_state_4()
     else:
-        return None
+        return (False,None)
 
 def number_lex_w_token_state_4():
     global int_value
@@ -1066,11 +1081,10 @@ def number_lex_w_token_state_4():
         int_value = (int_value*10) + int(ch)
         exp_value += 1
         return number_lex_w_token_state_4()
-    elif ch == END or ch == ' ':
-        result = 0
-        return result
+    elif ch in (END,' ','(',')') or ch in operator:
+        return (True,"NUM")
     else:
-        return None
+        return (False,None)
 
 def number_lex_w_token_state_5():
     global int_value
@@ -1084,7 +1098,7 @@ def number_lex_w_token_state_5():
     elif ch == '.':
         return number_lex_w_token_state_4()
     else:
-        return None
+        return (False,None)
 
 def number_lex_w_token_state_6():
     global int_value
@@ -1103,7 +1117,7 @@ def number_lex_w_token_state_6():
         sign_value = -1
         return number_lex_w_token_state_7()
     else:
-        return None
+        return (False,None)
 
 def number_lex_w_token_state_7():
     global int_value
@@ -1114,7 +1128,7 @@ def number_lex_w_token_state_7():
         exp_value = (exp_value*10) + int(ch)
         return number_lex_w_token_state_8()
     else:
-        return None
+        return (False,None)
 
 def number_lex_w_token_state_8():
     global int_value
@@ -1124,32 +1138,10 @@ def number_lex_w_token_state_8():
     if digit(ch):
         exp_value = (exp_value*10) + int(ch)
         return number_lex_w_token_state_8()
-    elif ch == END or ch == ' ':
-        return 0
+    elif ch in (END,' ','(',')') or ch in operator:
+        return (True,"NUM")
     else:
-        return None
-
-def number_lex_w_token_state_9():
-    global other_symbols
-    ch = next_char()
-    if ch == END:
-        match other_symbols:
-            case '+':
-                return 1
-            case '-':
-                return 2
-            case '*':
-                return 3
-            case '/':
-                return 4
-            case '(':
-                return 5
-            case ')':
-                return 6
-            case _:
-                return None
-    else:
-        return None
+        return (False,None)
 
 
 
@@ -1159,14 +1151,14 @@ if __name__ == "__main__":
     print("@ Vous pouvez changer l'automate testé en modifiant la fonction appelée à la ligne 'ok = ... '.")
     print("@ Tapez une entrée:")
     try:
-        #ok = pointfloat_Q2() # changer ici pour tester un autre automate sans valeur
+        #ok = FA_Lex() # changer ici pour tester un autre automate sans valeur
         #ok, val = number() # changer ici pour tester un autre automate avec valeur
-        ok, val = True, FA_Lex_w_token() # changer ici pour tester eval_exp et eval_exp_v2
+        ok, val = FA_Lex_w_token() # changer ici pour tester eval_exp et eval_exp_v2
         if ok:
             print("Accepted!")
             print("value:", val) # décommenter ici pour afficher la valeur (question 4 et +)
         else:
             print("Rejected!")
-            print("value so far:", int_value) # décommenter ici pour afficher la valeur en cas de rejet
+            print("value so far:", val) # décommenter ici pour afficher la valeur en cas de rejet
     except Error as e:
         print("Error:", e)
