@@ -787,15 +787,31 @@ def number_v2_state_8():
         return None
 
 
-# def eval_exp_v2():
-#     ch = peek_char()
-#     if ch == '+':
-#         consume_char()
-#         n1 = eval_exp_v2()
-#         n2 = eval_exp_v2()
-#         return n1 + n2
-#     else:
-#         return number_v2()
+def eval_exp_v2():
+    ch = peek_char()
+    match ch:
+        case '+':
+            consume_char()
+            n1 = eval_exp_v2()
+            n2 = eval_exp_v2()
+            return n1 + n2
+        case '-':
+            consume_char()
+            n1 = eval_exp_v2()
+            n2 = eval_exp_v2()
+            return n1 - n2
+        case '*':
+            consume_char()
+            n1 = eval_exp_v2()
+            n2 = eval_exp_v2()
+            return n1*n2
+        case '/':
+            consume_char()
+            n1 = eval_exp_v2()
+            n2 = eval_exp_v2()
+            return float(n1 / n2)
+        case _:
+            return number_v2()
 
 
 ############
@@ -1143,8 +1159,6 @@ def number_lex_w_token_state_8():
     else:
         return (False,None)
 
-
-
 # Fonction de test
 if __name__ == "__main__":
     print("@ Test interactif de l'automate")
@@ -1152,8 +1166,8 @@ if __name__ == "__main__":
     print("@ Tapez une entrée:")
     try:
         #ok = FA_Lex() # changer ici pour tester un autre automate sans valeur
-        #ok, val = number() # changer ici pour tester un autre automate avec valeur
-        ok, val = FA_Lex_w_token() # changer ici pour tester eval_exp et eval_exp_v2
+        ok, val = True,eval_exp_v2() # changer ici pour tester un autre automate avec valeur
+        #ok, val = FA_Lex_w_token() # changer ici pour tester eval_exp et eval_exp_v2
         if ok:
             print("Accepted!")
             print("value:", val) # décommenter ici pour afficher la valeur (question 4 et +)
